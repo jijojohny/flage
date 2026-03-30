@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+out/
+.next/
+build/
+cache/
+
+# Foundry
+packages/contracts/out/
+packages/contracts/cache/
+packages/contracts/lib/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+.nyc_output/
+htmlcov/
+.pytest_cache/
+
+# Documentation
+docs/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Secrets
+*.pem
+*.key
+credentials.json

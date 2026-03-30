@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  contracts:
+    name: Smart Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        working-directory: packages/contracts
+        run: forge install
+
+      - name: Build contracts
+        working-directory: packages/contracts
+        run: forge build --sizes
+
+      - name: Run tests
+        working-directory: packages/contracts
+        run: forge test -vvv
+
+      - name: Run fuzz tests
+        working-directory: packages/contracts
+        run: forge test --match-test testFuzz -vvv --fuzz-runs 1000
+
+      - name: Check formatting
+        working-directory: packages/contracts
+        run: forge fmt --check
+
+  storage-client:
+    name: Storage Client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/storage-client
+        run: npm ci
+
+      - name: Type check
+        working-directory: packages/storage-client
+        run: npx tsc --noEmit
+
+      - name: Lint
+        working-directory: packages/storage-client
+        run: npm run lint
+
+      - name: Test
+        working-directory: packages/storage-client
+        run: npm test
+
+  agent:
+    name: Trading Agent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: packages/agent
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Lint
+        working-directory: packages/agent
+        run: ruff check src/
+
+      - name: Type check
+        working-directory: packages/agent
+        run: mypy src/
+
+      - name: Test
+        working-directory: packages/agent
+        run: pytest tests/ -v
+
+  deploy-testnet:
+    name: Deploy to Galileo Testnet
+    needs: [contracts, storage-client, agent]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: testnet
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install contract dependencies
+        working-directory: packages/contracts
+        run: forge install
+
+      - name: Deploy contracts
+        working-directory: packages/contracts
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
+        run: |
+          forge script script/Deploy.s.sol \
+            --rpc-url https://evmrpc-testnet.0g.ai \
+            --broadcast \
+            --verify

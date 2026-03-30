@@ -1,0 +1,23 @@
+{
+  "name": "flage-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "flage — AI Arbitrage & Quant Protocol on 0G",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flage-protocol/og-darkpool"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@flage/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Solidity smart contracts — ERC-7857 iNFT, Vault, PoI Verifier, DEX Router",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "lint": "forge fmt --check",
+    "fmt": "forge fmt",
+    "clean": "forge clean",
+    "deploy:testnet": "forge script script/Deploy.s.sol --rpc-url https://evmrpc-testnet.0g.ai --broadcast",
+    "deploy:mainnet": "forge script script/Deploy.s.sol --rpc-url https://evmrpc.0g.ai --broadcast"
+  }
+}

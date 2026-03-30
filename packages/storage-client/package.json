@@ -1,0 +1,28 @@
+{
+  "name": "@flage/storage-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "0G Storage integration — Log Layer archival + KV Layer real-time serving",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@0gfoundation/0g-ts-sdk": "^0.5.0",
+    "ethers": "^6.11.0",
+    "ws": "^8.16.0",
+    "parquetjs": "^0.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "eslint": "^8.56.0"
+  }
+}
