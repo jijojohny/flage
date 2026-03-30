@@ -10,6 +10,7 @@ dependencies = [
     "eth-account>=0.11.0",
     "aiohttp>=3.9.0",
     "pydantic>=2.5.0",
+    "cryptography>=42.0.0",
 ]
 
 [project.optional-dependencies]

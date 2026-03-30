@@ -94,7 +94,7 @@ jobs:
 
       - name: Test
         working-directory: packages/agent
-        run: pytest tests/ -v
+        run: pytest tests/ -v --tb=short
 
   settlement:
     name: Settlement Service
