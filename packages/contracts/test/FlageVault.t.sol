@@ -4,33 +4,7 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 import "../src/FlageVault.sol";
 import "../src/DEXRouter.sol";
-
-contract MockERC20 {
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
-
-    function mint(address to, uint256 amount) external {
-        balanceOf[to] += amount;
-    }
-
-    function approve(address spender, uint256 amount) external returns (bool) {
-        allowance[msg.sender][spender] = amount;
-        return true;
-    }
-
-    function transfer(address to, uint256 amount) external returns (bool) {
-        balanceOf[msg.sender] -= amount;
-        balanceOf[to] += amount;
-        return true;
-    }
-
-    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        allowance[from][msg.sender] -= amount;
-        balanceOf[from] -= amount;
-        balanceOf[to] += amount;
-        return true;
-    }
-}
+import "./mocks/MockERC20.sol";
 
 contract MockDEXRouter {
     address public vault;
@@ -38,13 +12,12 @@ contract MockDEXRouter {
     function setVault(address _vault) external { vault = _vault; }
 
     function swap(
-        address tokenIn,
-        address tokenOut,
+        address,
+        address,
         uint256 amountIn,
-        uint256 priceLimit,
-        uint256 deadline
+        uint256,
+        uint256
     ) external returns (uint256) {
-        // Mock: transfer tokenIn from vault and return amountIn (1:1 for testing)
         return amountIn;
     }
 }
@@ -67,8 +40,8 @@ contract FlageVaultTest is Test {
         vault = new FlageVault(address(router));
         router.setVault(address(vault));
 
-        tokenA = new MockERC20();
-        tokenB = new MockERC20();
+        tokenA = new MockERC20("Token A", "TKA", 18);
+        tokenB = new MockERC20("Token B", "TKB", 6);
 
         teeSigner = vm.addr(teePrivKey);
 
