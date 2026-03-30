@@ -96,9 +96,33 @@ jobs:
         working-directory: packages/agent
         run: pytest tests/ -v
 
+  settlement:
+    name: Settlement Service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/settlement
+        run: npm ci
+
+      - name: Type check
+        working-directory: packages/settlement
+        run: npx tsc --noEmit
+
+      - name: Test
+        working-directory: packages/settlement
+        run: npm test -- --coverage
+
   deploy-testnet:
     name: Deploy to Galileo Testnet
-    needs: [contracts, storage-client, agent]
+    needs: [contracts, storage-client, agent, settlement]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
     environment: testnet
