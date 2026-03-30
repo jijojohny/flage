@@ -14,12 +14,15 @@ export class HistoricalDataArchiver {
   private flushTimer: NodeJS.Timeout | null = null;
   private uploadedRoots: string[] = [];
 
+  private rpcUrl: string;
+
   constructor(
     indexerUrl: string,
     rpcUrl: string,
     privateKey: string,
     flushIntervalMs = DEFAULT_FLUSH_INTERVAL,
   ) {
+    this.rpcUrl = rpcUrl;
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     this.signer = new ethers.Wallet(privateKey, provider);
     this.indexer = new Indexer(indexerUrl);
@@ -66,7 +69,7 @@ export class HistoricalDataArchiver {
       }
 
       const rootHash = tree.rootHash();
-      await this.indexer.upload(file, this.signer.provider!._getConnection().url, this.signer);
+      await this.indexer.upload(file, this.rpcUrl, this.signer);
       await file.close();
 
       return rootHash;
