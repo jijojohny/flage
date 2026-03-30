@@ -120,9 +120,41 @@ jobs:
         working-directory: packages/settlement
         run: npm test -- --coverage
 
+  dashboard:
+    name: Dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/dashboard
+        run: npm ci
+
+      - name: Type check
+        working-directory: packages/dashboard
+        run: npx tsc --noEmit
+
+      - name: Lint
+        working-directory: packages/dashboard
+        run: npm run lint
+
+      - name: Build
+        working-directory: packages/dashboard
+        env:
+          NEXT_PUBLIC_RPC_URL: https://evmrpc-testnet.0g.ai
+          NEXT_PUBLIC_VAULT_ADDRESS: "0x0000000000000000000000000000000000000000"
+          NEXT_PUBLIC_EXPLORER_URL: https://chainscan-galileo.0g.ai
+        run: npm run build
+
   deploy-testnet:
     name: Deploy to Galileo Testnet
-    needs: [contracts, storage-client, agent, settlement]
+    needs: [contracts, storage-client, agent, settlement, dashboard]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
     environment: testnet
