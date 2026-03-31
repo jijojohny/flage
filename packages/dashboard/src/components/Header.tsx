@@ -23,39 +23,47 @@ export function Header({ lastUpdate, onRefresh, activeTab, onTabChange, wallet }
   return (
     <header style={{
       borderBottom: '1px solid var(--border)',
-      background: 'var(--surface)',
+      background: 'var(--bg)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
     }}>
       {/* Top bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '14px 24px',
+        padding: '0 28px',
+        height: 52,
+        borderBottom: '1px solid var(--border)',
       }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
+            width: 10,
+            height: 10,
             background: 'var(--accent)',
-            boxShadow: '0 0 8px var(--accent)',
             flexShrink: 0,
           }} />
-          <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '0.05em' }}>FLAGE</span>
-          <span style={{ color: 'var(--muted)', fontSize: 11 }}>
-            AI Arbitrage Protocol · 0G Chain
+          <span style={{
+            fontWeight: 900,
+            fontSize: 14,
+            letterSpacing: '0.2em',
+            color: 'var(--accent)',
+            textTransform: 'uppercase',
+          }}>
+            FLAGE
           </span>
         </div>
 
-        {/* Right side: last update + refresh + wallet */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Nav links + wallet */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           {lastUpdate && (
-            <span style={{ color: 'var(--muted)', fontSize: 11 }}>
-              Updated {lastUpdate.toLocaleTimeString()}
+            <span style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {lastUpdate.toLocaleTimeString()}
             </span>
           )}
-          <button className="btn-ghost" onClick={onRefresh} style={{ fontSize: 12 }}>
+          <button className="btn-ghost" onClick={onRefresh} style={{ fontSize: 10, padding: '4px 10px' }}>
             Refresh
           </button>
           <WalletConnect wallet={wallet} />
@@ -65,8 +73,7 @@ export function Header({ lastUpdate, onRefresh, activeTab, onTabChange, wallet }
       {/* Tab navigation */}
       <nav style={{
         display: 'flex',
-        gap: 0,
-        padding: '0 24px',
+        padding: '0 28px',
       }}>
         {TABS.map(tab => (
           <button
@@ -79,10 +86,12 @@ export function Header({ lastUpdate, onRefresh, activeTab, onTabChange, wallet }
                 ? '2px solid var(--accent)'
                 : '2px solid transparent',
               color: activeTab === tab.id ? 'var(--accent)' : 'var(--muted)',
-              padding: '10px 18px',
-              fontSize: 13,
+              padding: '12px 20px',
+              fontSize: 11,
               fontFamily: 'var(--font)',
-              fontWeight: activeTab === tab.id ? 600 : 400,
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
               cursor: 'pointer',
               transition: 'color 0.15s, border-color 0.15s',
             }}
