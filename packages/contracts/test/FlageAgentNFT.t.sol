@@ -62,7 +62,7 @@ contract FlageAgentNFTTest is Test {
 
     function test_RevertMintNotOwner() public {
         vm.prank(alice);
-        IERC7857.IntelligentData[] memory data = new IERC7857.IntelligentData[](0);
+        IERC7857Metadata.IntelligentData[] memory data = new IERC7857Metadata.IntelligentData[](0);
         bytes[] memory keys = new bytes[](0);
         vm.expectRevert(FlageAgentNFT.NotOwner.selector);
         nft.mint(alice, data, keys);
@@ -70,7 +70,7 @@ contract FlageAgentNFTTest is Test {
 
     function test_RevertMintZeroAddress() public {
         vm.prank(protocol);
-        IERC7857.IntelligentData[] memory data = new IERC7857.IntelligentData[](0);
+        IERC7857Metadata.IntelligentData[] memory data = new IERC7857Metadata.IntelligentData[](0);
         bytes[] memory keys = new bytes[](0);
         vm.expectRevert(FlageAgentNFT.ZeroAddress.selector);
         nft.mint(address(0), data, keys);

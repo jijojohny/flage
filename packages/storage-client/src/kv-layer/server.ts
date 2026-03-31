@@ -1,11 +1,15 @@
-import { Batcher, KvClient, Indexer } from '@0gfoundation/0g-ts-sdk';
+import { Batcher, KvClient, Indexer, getFlowContract } from '@0gfoundation/0g-ts-sdk';
 import { ethers } from 'ethers';
-import type { OrderBookSnapshot, ArbitrageSignal, TickData } from '../types';
+import type { OrderBookSnapshot, ArbitrageSignal } from '../types';
+
+// 0G Flow contract address — same on mainnet & Galileo testnet
+const FLOW_CONTRACT = '0xbD2C3F0E65eDF5582141C35969d66e34629cC768';
 
 export class RealTimeDataServer {
   private kvClient: KvClient;
   private indexer: Indexer;
   private signer: ethers.Wallet;
+  private rpcUrl: string;
   private streamId: string;
 
   constructor(
@@ -17,6 +21,7 @@ export class RealTimeDataServer {
   ) {
     this.kvClient = new KvClient(kvNodeUrl);
     this.indexer = new Indexer(indexerUrl);
+    this.rpcUrl = rpcUrl;
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     this.signer = new ethers.Wallet(privateKey, provider);
     this.streamId = streamId;
@@ -25,7 +30,7 @@ export class RealTimeDataServer {
   // --- Writes ---
 
   async updateOrderBook(pair: string, snapshot: OrderBookSnapshot): Promise<void> {
-    const batcher = new Batcher(1, [this.indexer], this.signer, this.streamId);
+    const batcher = await this._makeBatcher();
     const data = JSON.stringify({
       ...snapshot,
       timestamp: snapshot.timestamp.toString(),
@@ -39,13 +44,13 @@ export class RealTimeDataServer {
   }
 
   async updatePrice(pair: string, price: string): Promise<void> {
-    const batcher = new Batcher(1, [this.indexer], this.signer, this.streamId);
+    const batcher = await this._makeBatcher();
     batcher.streamDataBuilder.set(`price:${pair}`, Buffer.from(price));
     await batcher.exec();
   }
 
   async publishSignal(signal: ArbitrageSignal): Promise<void> {
-    const batcher = new Batcher(1, [this.indexer], this.signer, this.streamId);
+    const batcher = await this._makeBatcher();
     const data = Buffer.from(JSON.stringify({
       ...signal,
       timestamp: signal.timestamp.toString(),
@@ -105,5 +110,14 @@ export class RealTimeDataServer {
       }),
     );
     return results;
+  }
+
+  // --- Internal ---
+
+  private async _makeBatcher(): Promise<Batcher> {
+    const flow = getFlowContract(FLOW_CONTRACT, this.signer);
+    const [nodes, err] = await this.indexer.selectNodes(1);
+    if (err) throw new Error(`Failed to select storage nodes: ${err.message}`);
+    return new Batcher(1, nodes, flow, this.rpcUrl);
   }
 }

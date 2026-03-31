@@ -12,7 +12,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@0gfoundation/0g-ts-sdk": "^0.5.0",
+    "@0gfoundation/0g-ts-sdk": "^1.2.1",
     "ethers": "^6.11.0",
     "ws": "^8.16.0",
     "parquetjs": "^0.11.0"

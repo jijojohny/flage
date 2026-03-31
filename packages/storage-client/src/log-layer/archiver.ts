@@ -61,18 +61,21 @@ export class HistoricalDataArchiver {
       await fs.writeFile(tmpPath, ndjson, 'utf8');
 
       const file = await ZgFile.fromFilePath(tmpPath);
-      const [tree, err] = await file.merkleTree();
-      if (err) {
-        console.error('[Archiver] Merkle tree error:', err);
+      const [, merkleErr] = await file.merkleTree();
+      if (merkleErr) {
+        console.error('[Archiver] Merkle tree error:', merkleErr);
         await file.close();
         return null;
       }
 
-      const rootHash = tree.rootHash();
-      await this.indexer.upload(file, this.rpcUrl, this.signer);
+      const [uploadResult, uploadErr] = await this.indexer.upload(file, this.rpcUrl, this.signer);
       await file.close();
 
-      return rootHash;
+      if (uploadErr) {
+        console.error('[Archiver] Upload error:', uploadErr);
+        return null;
+      }
+      return uploadResult.rootHash;
     } catch (e) {
       console.error('[Archiver] Upload failed:', e);
       return null;

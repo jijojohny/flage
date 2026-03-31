@@ -1,0 +1,79 @@
+version: '3.9'
+
+# ─── Flage testnet stack (0G Galileo, chain 16602) ───────────────────────────
+# Smart contracts run on the real 0G Galileo testnet.
+# Market data is provided by a local mock KV server (0G Storage KV testnet
+# does not have a public free endpoint).
+#
+# Usage:
+#   cp .env.testnet .env
+#   docker compose -f docker-compose.testnet.yml up --build
+#   — or —
+#   make docker-up-testnet
+
+services:
+
+  # ── 1. Mock 0G KV Layer ─────────────────────────────────────────────────────
+  mock-kv:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.mock-kv
+    ports:
+      - "6789:6789"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:6789/health')"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  # ── 2. Market data seeder ───────────────────────────────────────────────────
+  seeder:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.seeder
+    depends_on:
+      mock-kv:
+        condition: service_healthy
+    environment:
+      KV_URL: "http://mock-kv:6789"
+      STREAM_ID: "${OG_STREAM_ID:-testnet-stream}"
+      PAIRS: "${TARGET_PAIRS:-ETH/USDC,BTC/USDC}"
+    restart: unless-stopped
+
+  # ── 3. Trading agent ────────────────────────────────────────────────────────
+  agent:
+    build:
+      context: ./packages/agent
+      dockerfile: Dockerfile
+    depends_on:
+      mock-kv:
+        condition: service_healthy
+    environment:
+      VAULT_ADDRESS: "${VAULT_ADDRESS}"
+      OG_RPC_URL: "${OG_RPC_URL}"
+      OG_KV_NODE_URL: "http://mock-kv:6789"
+      OG_STREAM_ID: "${OG_STREAM_ID:-testnet-stream}"
+      SETTLEMENT_PRIVATE_KEY: "${SETTLEMENT_PRIVATE_KEY}"
+      TEE_SIGNING_KEY: "${TEE_SIGNING_KEY}"
+      TEE_HARDWARE_AVAILABLE: "${TEE_HARDWARE_AVAILABLE:-0}"
+      TARGET_PAIRS: "${TARGET_PAIRS:-ETH/USDC,BTC/USDC}"
+      CONFIDENCE_THRESHOLD: "${CONFIDENCE_THRESHOLD:-0.60}"
+      MAX_POSITION_SIZE: "${MAX_POSITION_SIZE:-1000000000000000000}"
+      MAX_DRAWDOWN: "${MAX_DRAWDOWN:-0.05}"
+      POLL_INTERVAL_SECONDS: "1.0"
+      DEVICE: "${DEVICE:-cpu}"
+    restart: unless-stopped
+
+  # ── 4. Dashboard ────────────────────────────────────────────────────────────
+  dashboard:
+    build:
+      context: ./packages/dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_RPC_URL: "${NEXT_PUBLIC_RPC_URL}"
+      NEXT_PUBLIC_VAULT_ADDRESS: "${NEXT_PUBLIC_VAULT_ADDRESS}"
+      NEXT_PUBLIC_EXPLORER_URL: "${NEXT_PUBLIC_EXPLORER_URL}"
+      NEXT_PUBLIC_TEE_KEY: "${NEXT_PUBLIC_TEE_KEY}"
+    command: npm run dev

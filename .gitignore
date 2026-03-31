@@ -14,6 +14,7 @@ cache/
 packages/contracts/out/
 packages/contracts/cache/
 packages/contracts/lib/
+packages/contracts/broadcast/
 
 # Python
 __pycache__/
@@ -29,6 +30,7 @@ venv/
 .env
 .env.local
 .env.*.local
+.env.testnet
 
 # IDE
 .vscode/
@@ -49,6 +51,11 @@ htmlcov/
 
 # Documentation
 docs/
+ARCHITECTURE.md
+
+# Generated / seeded assets
+scripts/
+package-lock.json
 
 # Logs
 *.log

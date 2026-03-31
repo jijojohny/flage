@@ -1,8 +1,6 @@
-import type { NextConfig } from 'next';
-
-const config: NextConfig = {
+/** @type {import('next').NextConfig} */
+const config = {
   reactStrictMode: true,
-  // Allow ethers and other CJS modules
   transpilePackages: [],
   webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };

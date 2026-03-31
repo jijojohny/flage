@@ -51,7 +51,8 @@ class FlageAgent:
         private_key: bytes | None = None,
     ):
         # Load TorchScript model (decrypted inside enclave)
-        self.model = torch.jit.load(model_path, map_location="cuda")
+        device = os.environ.get("DEVICE", "cpu")
+        self.model = torch.jit.load(model_path, map_location=device)
         self.model.eval()
 
         # Enclave-born keypair
@@ -81,7 +82,8 @@ class FlageAgent:
             return []
 
         features = self._extract_features(orderbooks, prices)
-        tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0).cuda()
+        device = os.environ.get("DEVICE", "cpu")
+        tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0).to(device)
 
         with torch.no_grad():
             predictions = self.model(tensor)  # (1, num_pairs * 3)

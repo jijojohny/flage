@@ -11,7 +11,7 @@
  *   model:norm:<modelId>             → JSON normalisation stats (mean/std/pairs)
  */
 
-import { ZgFile, Indexer, KvClient, Batcher } from '@0gfoundation/0g-ts-sdk';
+import { ZgFile, Indexer, KvClient, Batcher, getFlowContract } from '@0gfoundation/0g-ts-sdk';
 import { ethers } from 'ethers';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
@@ -114,7 +114,7 @@ export class ModelStorageClient {
       normStatsHash,
     };
 
-    const batcher = new Batcher(1, [this.indexer], this.signer, this.streamId);
+    const batcher = await this._makeBatcher();
     batcher.streamDataBuilder.set(`model:weights:${modelId}`, Buffer.from(rootHash));
     batcher.streamDataBuilder.set(`model:meta:${modelId}`, Buffer.from(JSON.stringify(meta)));
     batcher.streamDataBuilder.set(`model:norm:${modelId}`, Buffer.from(normJson));
@@ -196,16 +196,19 @@ export class ModelStorageClient {
     try {
       await fs.writeFile(tmpPath, data);
       const file = await ZgFile.fromFilePath(tmpPath);
-      const [tree, err] = await file.merkleTree();
-      if (err) {
-        console.error('[ModelStorage] Merkle tree error:', err);
+      const [, merkleErr] = await file.merkleTree();
+      if (merkleErr) {
+        console.error('[ModelStorage] Merkle tree error:', merkleErr);
         await file.close();
         return null;
       }
-      const rootHash = tree.rootHash();
-      await this.indexer.upload(file, this.rpcUrl, this.signer);
+      const [uploadResult, uploadErr] = await this.indexer.upload(file, this.rpcUrl, this.signer);
       await file.close();
-      return rootHash;
+      if (uploadErr) {
+        console.error('[ModelStorage] Upload error:', uploadErr);
+        return null;
+      }
+      return uploadResult.rootHash;
     } finally {
       await fs.unlink(tmpPath).catch(() => {});
     }
@@ -228,5 +231,15 @@ export class ModelStorageClient {
     } catch {
       return null;
     }
+  }
+
+  private async _makeBatcher(): Promise<Batcher> {
+    const flow = getFlowContract(
+      '0xbD2C3F0E65eDF5582141C35969d66e34629cC768',
+      this.signer,
+    );
+    const [nodes, err] = await this.indexer.selectNodes(1);
+    if (err) throw new Error(`Failed to select storage nodes: ${err.message}`);
+    return new Batcher(1, nodes, flow, this.rpcUrl);
   }
 }

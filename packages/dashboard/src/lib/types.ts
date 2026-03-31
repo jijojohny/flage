@@ -38,3 +38,26 @@ export interface ChartDataPoint {
   sells: number;
   volume: number;
 }
+
+export interface TokenInfo {
+  symbol: string;
+  address: string;
+  decimals: number;
+  logoColor: string; // accent color for the token badge
+}
+
+export interface VaultBalance {
+  token: TokenInfo;
+  vaultBalance: bigint;       // how much vault holds
+  walletBalance: bigint;      // how much the connected wallet holds
+  allowance: bigint;          // wallet's approved amount to vault
+}
+
+export type TxStatus =
+  | { state: 'idle' }
+  | { state: 'approving' }
+  | { state: 'pending'; hash: string }
+  | { state: 'confirmed'; hash: string }
+  | { state: 'error'; message: string };
+
+export type Tab = 'overview' | 'portfolio' | 'invest' | 'withdraw';

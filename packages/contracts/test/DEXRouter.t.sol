@@ -146,11 +146,11 @@ contract DEXRouterTest is Test {
 
     function test_SwapCurveFallsThruOnRevert() public {
         curvePool.setRevert(true);
-        MockUniV3Router fallback = new MockUniV3Router();
+        MockUniV3Router uniBackup = new MockUniV3Router();
 
         vm.startPrank(owner);
         router.addDEXConfig(pairHash, address(curvePool), 1, 0, 0, 1); // fails
-        router.addDEXConfig(pairHash, address(fallback), 0, 3000, 0, 0); // succeeds
+        router.addDEXConfig(pairHash, address(uniBackup), 0, 3000, 0, 0); // succeeds
         vm.stopPrank();
 
         vm.prank(vault);

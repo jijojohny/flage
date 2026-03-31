@@ -14,6 +14,41 @@ export const VAULT_ABI = [
     outputs: [{ type: 'int256' }],
   },
   {
+    name: 'owner',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: 'owner', type: 'address' }],
+  },
+  {
+    name: 'whitelistedTokens',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'token', type: 'address' }],
+    outputs: [{ type: 'bool' }],
+  },
+  {
+    name: 'deposit',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [],
+  },
+  {
+    name: 'withdraw',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+      { name: 'to', type: 'address' },
+    ],
+    outputs: [],
+  },
+  {
     name: 'teeRegistrations',
     type: 'function',
     stateMutability: 'view',
@@ -49,5 +84,66 @@ export const VAULT_ABI = [
       { name: 'nonce', type: 'uint256', indexed: false },
       { name: 'teeKey', type: 'address', indexed: true },
     ],
+  },
+  {
+    name: 'Deposited',
+    type: 'event',
+    inputs: [
+      { name: 'token', type: 'address', indexed: false },
+      { name: 'amount', type: 'uint256', indexed: false },
+    ],
+  },
+  {
+    name: 'Withdrawn',
+    type: 'event',
+    inputs: [
+      { name: 'token', type: 'address', indexed: false },
+      { name: 'amount', type: 'uint256', indexed: false },
+      { name: 'to', type: 'address', indexed: false },
+    ],
+  },
+] as const;
+
+export const ERC20_ABI = [
+  {
+    name: 'balanceOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ type: 'bool' }],
+  },
+  {
+    name: 'allowance',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
+    ],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    name: 'decimals',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint8' }],
+  },
+  {
+    name: 'symbol',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'string' }],
   },
 ] as const;

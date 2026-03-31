@@ -11,7 +11,6 @@ import os
 
 import aiohttp
 from web3 import AsyncWeb3, Web3
-from web3.middleware import geth_poa_middleware
 
 from agent import FlageAgent, SignedTrade
 
